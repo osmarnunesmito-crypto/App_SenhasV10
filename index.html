@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerenciador_Senhas</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+body{background:#1a1a3e;color:#fff;padding:15px;min-height:100vh}
+.login-screen{display:flex;justify-content:center;align-items:center;min-height:100vh}
+.login-box{background:linear-gradient(135deg,#1e1e6e,#4b0082);padding:30px;border-radius:15px;width:100%;max-width:400px;text-align:center;border:2px solid rgba(255,215,0,.3)}
+.login-box h1{color:#ffd700;font-size:1.8em;margin-bottom:5px}
+.login-box p{color:#ccc;margin-bottom:15px}
+input,select,textarea{width:100%;padding:12px;margin:8px 0;border:1px solid rgba(255,215,0,.3);border-radius:8px;background:rgba(0,0,0,.5);color:#fff;font-size:15px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#ffd700}
+textarea{resize:vertical;min-height:60px}
+button{padding:12px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;transition:.2s}
+button:hover{transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,#ffd700,#ffb700);color:#1a1a3e;width:100%;font-size:1.1em}
+.btn-red{background:#d32f2f;color:#fff;margin-top:8px;width:100%}
+.error{color:#ff5252;font-size:.9em;margin-top:5px;min-height:20px}
+.info-box{background:rgba(255,215,0,.1);padding:10px;border-radius:8px;margin:10px 0;font-size:.85em;color:#ffd700;text-align:left}
+.header{background:linear-gradient(135deg,#1e1e6e,#4b0082);padding:15px 20px;border-radius:12px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.header h2{color:#ffd700}
+.dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:15px}
+.card{background:rgba(30,30,110,.9);padding:15px;border-radius:10px;text-align:center;cursor:pointer;border:1px solid rgba(255,215,0,.2);transition:.2s}
+.card:hover{border-color:#ffd700;transform:translateY(-2px)}
+.card.active{border-color:#ffd700;background:rgba(75,0,130,.9)}
+.card .icon{font-size:1.8em;margin-bottom:5px}
+.card .num{font-size:1.6em;font-weight:bold;color:#ffd700}
+.card .label{font-size:.75em;color:#ccc}
+.card.action{background:rgba(0,150,136,.3);border-color:rgba(0,188,212,.4)}
+.card.action:hover{border-color:#00bcd4}
+.main{display:grid;grid-template-columns:380px 1fr;gap:15px}
+.panel{background:rgba(30,30,110,.9);padding:18px;border-radius:12px;border:1px solid rgba(255,215,0,.2)}
+.panel h3{color:#ffd700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,215,0,.3);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.panel h3 span{font-size:.7em;color:#ccc;font-weight:normal}
+.entry{background:rgba(0,0,0,.4);padding:14px;border-radius:10px;margin-bottom:10px;border:1px solid rgba(255,215,0,.1);transition:.2s}
+.entry:hover{border-color:rgba(255,215,0,.4)}
+.entry-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.entry-title{font-weight:bold;color:#ffd700;font-size:1.05em}
+.entry-type{background:#ffd700;color:#1a1a3e;padding:3px 10px;border-radius:12px;font-size:.75em;font-weight:bold;white-space:nowrap}
+.entry-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px}
+.entry-field{font-size:.85em}
+.entry-field label{color:#ffd700;font-size:.75em;display:block;margin-bottom:2px}
+.entry-field span{color:#fff;word-break:break-word}
+.entry-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.btn-sm{padding:7px 14px;font-size:.82em;border-radius:6px;min-width:60px}
+.btn-edit{background:#00bcd4;color:#fff}
+.btn-del{background:#d32f2f;color:#fff}
+.btn-copy{background:transparent;border:1px solid #ffd700;color:#ffd700;cursor:pointer;padding:4px 8px;border-radius:4px;font-size:.8em}
+.btn-copy:hover{background:rgba(255,215,0,.2)}
+.btn-sync{background:#ff6f00;color:#fff}
+.pwd-display{display:inline-flex;align-items:center;gap:5px}
+.pwd-display span{cursor:pointer;padding:2px 6px;background:rgba(255,215,0,.1);border-radius:4px;font-family:monospace}
+.pwd-display span:hover{background:rgba(255,215,0,.3)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);justify-content:center;align-items:center;z-index:999;padding:15px}
+.modal.show{display:flex}
+.modal-content{background:linear-gradient(135deg,#1e1e6e,#4b0082);padding:25px;border-radius:12px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;border:2px solid rgba(255,215,0,.3)}
+.modal-content h3{color:#ffd700;margin-bottom:15px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);background:#4b0082;color:#fff;padding:10px 20px;border-radius:8px;border:1px solid #ffd700;opacity:0;transition:.3s;z-index:9999;font-size:.9em}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#qrOutput{background:#fff;padding:15px;border-radius:10px;display:flex;justify-content:center;min-height:200px;align-items:center;flex-direction:column;gap:10px;margin-top:15px;}
+.field-group{margin-bottom:12px}
+.field-group label{display:block;color:#ffd700;font-size:.85em;margin-bottom:4px}
+.field-group label i{margin-right:4px}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-bar input,.filter-bar select{flex:1;min-width:140px;padding:10px}
+.url-box{background:rgba(0,0,0,.5);padding:12px;border-radius:8px;word-break:break-all;font-family:monospace;font-size:.8em;margin:10px 0;border:1px solid rgba(255,215,0,.3);max-height:100px;overflow-y:auto}
+@media(max-width:768px){
+  .main{grid-template-columns:1fr}
+  .dashboard{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}
+  .entry-grid{grid-template-columns:1fr}
+  .card{padding:12px 8px}
+  .card .icon{font-size:1.4em}
+  .card .num{font-size:1.3em}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== TELA DE LOGIN ==================== -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div style="font-size:3em;margin-bottom:10px">🔐</div>
+    <h1>Gerenciador_Senhas</h1>
+    <p>Cofre Digital Seguro</p>
+    <div id="loginInfo" class="info-box"></div>
+    <input type="password" id="masterPwd" placeholder="🔑 Senha Mestra (mín. 4 dígitos)" autocomplete="off">
+    <input type="password" id="confirmPwd" placeholder="✅ Confirmar Senha" style="display:none" autocomplete="off">
+    <button class="btn-gold" onclick="handleLogin()">🔓 Entrar</button>
+    <div id="loginError" class="error"></div>
+    <button class="btn-red" id="btnReset" style="display:none" onclick="resetAll()">🗑️ Apagar Tudo (Esqueci a Senha)</button>
+  </div>
+</div>
+
+<!-- ==================== APP PRINCIPAL ==================== -->
+<div id="mainApp" style="display:none">
+  <div class="header">
+    <div>
+      <h2>🔐 Gerenciador_Senhas</h2>
+      <small style="color:#ffd700;font-size:.7em;letter-spacing:2px">COFRE DIGITAL SEGURO</small>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-sm btn-edit" onclick="openSyncModal()">🔗 Sincronizar</button>
+      <button class="btn-sm btn-sync" onclick="shareData()">📤 Compartilhar</button>
+      <button class="btn-sm" style="background:#9c27b0;color:#fff" onclick="exportJSON()">💾 Backup</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+      <button class="btn-sm" style="background:#4caf50;color:#fff" onclick="document.getElementById('importFile').click()">📥 Importar</button>
+      <button class="btn-sm btn-del" onclick="lockApp()">🔒 Bloquear</button>
+    </div>
+  </div>
+
+  <div class="dashboard" id="dashboard"></div>
+
+  <div class="main">
+    <div class="panel">
+      <h3>➕ Novo Lançamento</h3>
+      <div class="field-group">
+        <label><i>🏷️</i> Tipo de Lançamento</label>
+        <select id="entryType" onchange="changeType()">
+          <option value="">Selecione o tipo...</option>
+          <optgroup label="💰 BANCOS">
+            <option value="bradesco">🏦 Bradesco</option><option value="bb">🏦 Banco do Brasil</option>
+            <option value="itau">🏦 Itaú</option><option value="caixa">🏦 Caixa Econômica</option>
+            <option value="nubank">📱 Nubank</option><option value="santander">🏦 Santander</option>
+            <option value="c6">🏦 Banco C6</option><option value="picpay">📱 PicPay</option>
+            <option value="mercadopago">📱 Mercado Pago</option><option value="bancooutros">🏦 Outros Bancos</option>
+          </optgroup>
+          <optgroup label="💧 CONCESSIONÁRIAS">
+            <option value="aguas">💧 Águas de Manaus</option><option value="energia">⚡ Amazonas Energia</option>
+            <option value="vivo">📱 Vivo</option><option value="concoutros">💧 Outras Concessionárias</option>
+          </optgroup>
+          <optgroup label="📧 E-MAILS"><option value="email">📧 E-mail</option></optgroup>
+          <optgroup label="📱 REDES / STREAMING">
+            <option value="social">📱 Rede Social</option><option value="streaming">🎬 Streaming</option>
+          </optgroup>
+          <optgroup label="🇧🇷 GOVERNO"><option value="govbr">🇧🇷 Gov.br</option></optgroup>
+          <optgroup label="📦 OUTROS"><option value="outros">📦 Outros</option></optgroup>
+        </select>
+      </div>
+      <div id="bankFields" style="display:none">
+        <div class="field-group"><label>🏦 Banco</label><input type="text" id="bankName" placeholder="Nome do Banco" autocomplete="off"></div>
+        <div class="field-group"><label>🏢 Agência</label><input type="text" id="bankAgency" placeholder="Número da Agência" autocomplete="off"></div>
+        <div class="field-group"><label>📋 Conta</label><input type="text" id="bankAccount" placeholder="Número da Conta" autocomplete="off"></div>
+        <div class="field-group"><label>🔑 Senha de Acesso</label><input type="password" id="bankPwdAcesso" placeholder="Senha de acesso" autocomplete="off"></div>
+        <div class="field-group"><label>💳 Senha de Transação</label><input type="password" id="bankPwdTrans" placeholder="Senha para transações" autocomplete="off"></div>
+        <div class="field-group"><label>📝 Senhas Adicionais</label><input type="text" id="bankPwdAdic" placeholder="Outras senhas" autocomplete="off"></div>
+      </div>
+      <div id="concFields" style="display:none">
+        <div class="field-group"><label>🏢 Concessionária</label><input type="text" id="concName" placeholder="Nome da Concessionária" autocomplete="off"></div>
+        <div class="field-group"><label>🆔 Matrícula / Código</label><input type="text" id="concMatricula" placeholder="Número da Matrícula" autocomplete="off"></div>
+        <div class="field-group"><label>🔑 Senha</label><input type="password" id="concPwd" placeholder="Senha de acesso" autocomplete="off"></div>
+      </div>
+      <div id="genericFields">
+        <div class="field-group"><label>📝 Título / Nome</label><input type="text" id="entryTitle" placeholder="Ex: E-mail pessoal, Netflix" autocomplete="off"></div>
+        <div class="field-group"><label>👤 Login / Usuário</label><input type="text" id="entryLogin" placeholder="Login ou e-mail" autocomplete="off"></div>
+        <div class="field-group"><label>🔑 Senha</label><input type="password" id="entryPassword" placeholder="Senha" autocomplete="off"></div>
+        <div class="field-group"><label>📝 Observações</label><textarea id="entryNotes" placeholder="Informações adicionais" rows="2"></textarea></div>
+      </div>
+      <button class="btn-gold" onclick="addEntry()">💾 Salvar Lançamento</button>
+    </div>
+
+    <div class="panel">
+      <h3>📋 Lançamentos <span id="entryCount"></span></h3>
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar..." onkeyup="renderList()" autocomplete="off">
+        <select id="filterType" onchange="filterByType()">
+          <option value="">📂 Todas categorias</option>
+          <option value="banco">💰 Bancos</option>
+          <option value="concessionaria">💧 Concessionárias</option>
+          <option value="email">📧 E-mails</option>
+          <option value="social">📱 Redes/Streaming</option>
+          <option value="gov">🇧🇷 Gov.br</option>
+          <option value="outros">📦 Outros</option>
+        </select>
+      </div>
+      <div id="entryList" style="max-height:550px;overflow-y:auto;padding-right:5px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL DE SINCRONIZAÇÃO (Link + QR Code) ==================== -->
+<div id="syncModal" class="modal">
+  <div class="modal-content">
+    <h3>🔗 Sincronizar Dispositivos</h3>
+    
+    <div style="background:rgba(0,188,212,.1);border:1px solid rgba(0,188,212,.3);padding:12px;border-radius:8px;margin-bottom:12px;font-size:.85em;color:#b2ebf2">
+        <strong>📌 Como funciona:</strong><br>
+        1️⃣ Clique em "Gerar Link e QR Code".<br>
+        2️⃣ No celular, aponte a câmera para o QR Code e abra o link.<br>
+        3️⃣ Ou, clique em "Copiar Link" e envie para o outro dispositivo.
+    </div>
+
+    <button class="btn-gold" onclick="generateShareURL()" style="margin-bottom:15px">🔄 Gerar Link e QR Code</button>
+    
+    <div id="syncOutput" style="display:none">
+        <p style="font-size:.9em;color:#ccc"><strong>Opção 1: Escaneie o QR Code</strong></p>
+        <div id="qrOutput"><span style="color:#333">QR Code aparecerá aqui</span></div>
+
+        <p style="font-size:.9em;color:#ccc; margin-top:15px;"><strong>Opção 2: Use o Link</strong></p>
+        <div class="url-box" id="urlTextBox"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn-sm btn-edit" onclick="copyURL()" style="flex:1">📋 Copiar Link</button>
+          <button class="btn-sm btn-sync" onclick="shareURL()" style="flex:1">📤 Compartilhar</button>
+        </div>
+    </div>
+
+    <button class="btn-sm btn-del" onclick="closeSyncModal()" style="width:100%;margin-top:20px">Fechar</button>
+  </div>
+</div>
+
+<!-- MODAL EDIÇÃO -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <h3>✏️ Editar Lançamento</h3>
+    <input type="hidden" id="editId">
+    <div class="field-group"><label>🏷️ Tipo</label><select id="editType" onchange="changeEditType()">
+      <option value="">Selecione...</option>
+      <optgroup label="💰 BANCOS">
+        <option value="bradesco">Bradesco</option><option value="bb">Banco do Brasil</option>
+        <option value="itau">Itaú</option><option value="caixa">Caixa</option>
+        <option value="nubank">Nubank</option><option value="santander">Santander</option>
+        <option value="c6">C6</option><option value="picpay">PicPay</option>
+        <option value="mercadopago">Mercado Pago</option><option value="bancooutros">Outros Bancos</option>
+      </optgroup>
+      <optgroup label="💧 CONCESSIONÁRIAS">
+        <option value="aguas">Águas de Manaus</option><option value="energia">Amazonas Energia</option>
+        <option value="vivo">Vivo</option><option value="concoutros">Outras</option>
+      </optgroup>
+      <optgroup label="OUTROS">
+        <option value="email">E-mail</option><option value="social">Rede Social</option>
+        <option value="streaming">Streaming</option><option value="govbr">Gov.br</option>
+        <option value="outros">Outros</option>
+      </optgroup>
+    </select></div>
+    <div id="editBankFields" style="display:none">
+      <div class="field-group"><label>Banco</label><input type="text" id="editBankName" autocomplete="off"></div>
+      <div class="field-group"><label>Agência</label><input type="text" id="editBankAgency" autocomplete="off"></div>
+      <div class="field-group"><label>Conta</label><input type="text" id="editBankAccount" autocomplete="off"></div>
+      <div class="field-group"><label>Senha Acesso</label><input type="password" id="editBankPwdAcesso" autocomplete="off"></div>
+      <div class="field-group"><label>Senha Transação</label><input type="password" id="editBankPwdTrans" autocomplete="off"></div>
+      <div class="field-group"><label>Senhas Adicionais</label><input type="text" id="editBankPwdAdic" autocomplete="off"></div>
+    </div>
+    <div id="editConcFields" style="display:none">
+      <div class="field-group"><label>Concessionária</label><input type="text" id="editConcName" autocomplete="off"></div>
+      <div class="field-group"><label>Matrícula</label><input type="text" id="editConcMatricula" autocomplete="off"></div>
+      <div class="field-group"><label>Senha</label><input type="password" id="editConcPwd" autocomplete="off"></div>
+    </div>
+    <div id="editGenericFields">
+      <div class="field-group"><label>Título</label><input type="text" id="editTitle" autocomplete="off"></div>
+      <div class="field-group"><label>Login</label><input type="text" id="editLogin" autocomplete="off"></div>
+      <div class="field-group"><label>Senha</label><input type="password" id="editPassword" autocomplete="off"></div>
+      <div class="field-group"><label>Observações</label><textarea id="editNotes" rows="2"></textarea></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:15px">
+      <button class="btn-sm btn-del" onclick="closeEditModal()" style="flex:1">Cancelar</button>
+      <button class="btn-sm btn-gold" onclick="saveEdit()" style="flex:1;color:#1a1a3e">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- SCRIPTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+
+<script>
+// ==================== ARMAZENAMENTO E DADOS GLOBAIS ====================
+let masterPassword = null;
+let entries = []; // A lista de entradas em memória
+let inactivityTimer = null;
+let catFilter = '';
+let currentShareURL = '';
+
+// Tipos
+const TYPE_CATEGORIES = {
+  bradesco:'banco',bb:'banco',itau:'banco',caixa:'banco',nubank:'banco',santander:'banco',
+  c6:'banco',picpay:'banco',mercadopago:'banco',bancooutros:'banco',
+  aguas:'concessionaria',energia:'concessionaria',vivo:'concessionaria',concoutros:'concessionaria',
+  email:'email',social:'social',streaming:'streaming',govbr:'gov',outros:'outros'
+};
+const TYPE_LABELS = {
+  bradesco:'Bradesco',bb:'Banco do Brasil',itau:'Itaú',caixa:'Caixa',nubank:'Nubank',
+  santander:'Santander',c6:'C6',picpay:'PicPay',mercadopago:'Mercado Pago',bancooutros:'Outros Bancos',
+  aguas:'Águas de Manaus',energia:'Amazonas Energia',vivo:'Vivo',concoutros:'Outras Concessionárias',
+  email:'E-mail',social:'Rede Social',streaming:'Streaming',govbr:'Gov.br',outros:'Outros'
+};
+const BANK_TYPES = ['bradesco','bb','itau','caixa','nubank','santander','c6','picpay','mercadopago','bancooutros'];
+const CONC_TYPES = ['aguas','energia','vivo','concoutros'];
+function isBank(t){return BANK_TYPES.includes(t);}
+function isConc(t){return CONC_TYPES.includes(t);}
+function getCat(t){return TYPE_CATEGORIES[t]||'outros';}
+
+// ==================== FUNÇÕES DE ARMAZENAMENTO (LocalStorage) ====================
+function setItem(key, value) {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+        console.error("Erro ao salvar no localStorage", e);
+        showToast("❌ Erro ao salvar dados!");
+    }
+}
+
+function getItem(key, defaultValue) {
+    try {
+        const value = localStorage.getItem(key);
+        if (value === null || value === undefined) {
+            return defaultValue;
+        }
+        return JSON.parse(value);
+    } catch (e) {
+        console.error("Erro ao ler do localStorage", e);
+        return defaultValue;
+    }
+}
+
+function clearAll() {
+    localStorage.removeItem('master_pwd');
+    localStorage.removeItem('entries');
+    masterPassword = null;
+    entries = [];
+}
+
+// ==================== LOGIN E INICIALIZAÇÃO ====================
+function setupLoginScreen(){
+  const sp = getItem('master_pwd', null);
+  document.getElementById('loginInfo').innerHTML = sp ? '🔒 Digite sua senha mestra' : '🆕 <b>Primeira vez?</b> Crie sua senha (mín. 4)';
+  document.getElementById('confirmPwd').style.display = sp ? 'none' : 'block';
+  document.getElementById('btnReset').style.display = sp ? 'block' : 'none';
+  if (sp) masterPassword = sp;
+}
+
+function handleLogin(){
+  const p = document.getElementById('masterPwd').value.trim();
+  const c = document.getElementById('confirmPwd').value.trim();
+  const sp = getItem('master_pwd', null);
+  if (!p) { document.getElementById('loginError').textContent = '❌ Digite a senha!'; return; }
+  if (!sp) {
+    if (p !== c) { document.getElementById('loginError').textContent = '❌ Senhas não coincidem!'; return; }
+    if (p.length < 4) { document.getElementById('loginError').textContent = '❌ Mínimo 4 caracteres!'; return; }
+    masterPassword = p;
+    setItem('master_pwd', p);
+    loadApp();
+    showToast('✅ Senha criada e salva!');
+  } else {
+    if (p === sp) {
+      masterPassword = sp;
+      loadApp();
+    } else {
+      document.getElementById('loginError').textContent = '❌ Senha incorreta!';
+      document.getElementById('masterPwd').value = '';
+    }
+  }
+}
+document.getElementById('masterPwd').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+document.getElementById('confirmPwd').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+
+function resetAll() {
+    if (confirm('⚠️ TEM CERTEZA?\nIsso apagará TODOS os dados salvos PERMANENTEMENTE.')) {
+        clearAll();
+        document.getElementById('masterPwd').value = '';
+        document.getElementById('confirmPwd').value = '';
+        setupLoginScreen();
+        showToast('🗑️ Todos os dados foram apagados.');
+    }
+}
+
+function loadApp(){
+  entries = getItem('entries', []); // Carrega as entradas do localStorage
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  checkURLForImport(); // ESSENCIAL: Verificar se há importação via URL
+  renderDashboard();
+  renderList();
+  resetInactivity();
+}
+
+function lockApp(){
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('masterPwd').value = '';
+  setupLoginScreen();
+  clearTimeout(inactivityTimer);
+}
+
+function resetInactivity() { clearTimeout(inactivityTimer); inactivityTimer = setTimeout(lockApp, 5 * 60 * 1000); }
+['click', 'keydown', 'mousemove', 'touchstart'].forEach(ev => document.addEventListener(ev, resetInactivity));
+
+function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function escHtml(t) { if (!t) return '-'; return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+// ==================== DASHBOARD E FILTROS ====================
+function renderDashboard(){
+  const d=document.getElementById('dashboard');
+  const total=entries.length;
+  const counts={};['banco','concessionaria','email','social','streaming','gov','outros'].forEach(c=>{counts[c]=entries.filter(e=>getCat(e.type)===c).length;});
+  d.innerHTML=`
+    <div class="card ${catFilter===''?'active':''}" onclick="filterCat('')"><div class="icon">🔐</div><div class="num">${total}</div><div class="label">Total</div></div>
+    <div class="card ${catFilter==='banco'?'active':''}" onclick="filterCat('banco')"><div class="icon">🏦</div><div class="num">${counts.banco}</div><div class="label">Bancos</div></div>
+    <div class="card ${catFilter==='concessionaria'?'active':''}" onclick="filterCat('concessionaria')"><div class="icon">💧</div><div class="num">${counts.concessionaria}</div><div class="label">Concessionárias</div></div>
+    <div class="card ${catFilter==='email'?'active':''}" onclick="filterCat('email')"><div class="icon">📧</div><div class="num">${counts.email}</div><div class="label">E-mails</div></div>
+    <div class="card ${catFilter==='social'?'active':''}" onclick="filterCat('social')"><div class="icon">📱</div><div class="num">${counts.social+counts.streaming}</div><div class="label">Redes/Stream</div></div>
+    <div class="card ${catFilter==='gov'?'active':''}" onclick="filterCat('gov')"><div class="icon">🇧🇷</div><div class="num">${counts.gov}</div><div class="label">Gov.br</div></div>
+    <div class="card ${catFilter==='outros'?'active':''}" onclick="filterCat('outros')"><div class="icon">📦</div><div class="num">${counts.outros}</div><div class="label">Outros</div></div>
+    <div class="card action" onclick="openSyncModal()"><div class="icon">🔗</div><div class="label">Sincronizar</div></div>
+    <div class="card action" onclick="shareData()"><div class="icon">📤</div><div class="label">Compartilhar</div></div>
+  `;
+}
+function filterCat(c){catFilter=c;document.getElementById('filterType').value=c;renderDashboard();renderList();}
+function filterByType(){catFilter=document.getElementById('filterType').value;renderDashboard();renderList();}
+
+// ==================== CRUD DE LANÇAMENTOS ====================
+function changeType(){
+  const t=document.getElementById('entryType').value;
+  document.getElementById('bankFields').style.display=isBank(t)?'block':'none';
+  document.getElementById('concFields').style.display=isConc(t)?'block':'none';
+  document.getElementById('genericFields').style.display=(!isBank(t)&&!isConc(t))?'block':'none';
+  const db={bradesco:'Bradesco',bb:'Banco do Brasil',itau:'Itaú',caixa:'Caixa',nubank:'Nubank',santander:'Santander',c6:'C6',picpay:'PicPay',mercadopago:'Mercado Pago'};
+  const dc={aguas:'Águas de Manaus',energia:'Amazonas Energia',vivo:'Vivo'};
+  if(db[t])document.getElementById('bankName').value=db[t];
+  if(dc[t])document.getElementById('concName').value=dc[t];
+}
+
+function addEntry(){
+  const t=document.getElementById('entryType').value;
+  if(!t){showToast('⚠️ Selecione um tipo!');return;}
+  const now = new Date().toISOString();
+  const en={id:Date.now(),type:t,createdAt:now, modifiedAt: now}; // Adiciona modifiedAt
+  if(isBank(t)){
+    en.bankName=document.getElementById('bankName').value.trim();en.bankAgency=document.getElementById('bankAgency').value.trim();
+    en.bankAccount=document.getElementById('bankAccount').value.trim();en.pwdAcesso=document.getElementById('bankPwdAcesso').value;
+    en.pwdTrans=document.getElementById('bankPwdTrans').value;en.pwdAdic=document.getElementById('bankPwdAdic').value;
+    en.title=en.bankName||'Banco';en.login='Ag: '+(en.bankAgency||'-')+' / C/C: '+(en.bankAccount||'-');
+    if(!en.bankName){showToast('⚠️ Informe o banco!');return;}
+  }else if(isConc(t)){
+    en.concName=document.getElementById('concName').value.trim();en.concMatricula=document.getElementById('concMatricula').value.trim();
+    en.password=document.getElementById('concPwd').value;en.title=en.concName||'Concessionária';
+    en.login='Matrícula: '+(en.concMatricula||'-');
+    if(!en.concMatricula){showToast('⚠️ Informe a matrícula!');return;}
+  }else{
+    en.title=document.getElementById('entryTitle').value.trim();en.login=document.getElementById('entryLogin').value.trim();
+    en.password=document.getElementById('entryPassword').value;en.notes=document.getElementById('entryNotes').value.trim();
+    if(!en.title||!en.login||!en.password){showToast('⚠️ Preencha título, login e senha!');return;}
+  }
+  entries.push(en);setItem('entries',entries);clearForm();renderDashboard();renderList();
+  showToast('✅ Salvo em "'+TYPE_LABELS[t]+'"!');
+}
+function clearForm(){
+  document.getElementById('entryType').value='';
+  ['bankName','bankAgency','bankAccount','bankPwdAcesso','bankPwdTrans','bankPwdAdic','concName','concMatricula','concPwd','entryTitle','entryLogin','entryPassword','entryNotes'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('bankFields').style.display='none';document.getElementById('concFields').style.display='none';document.getElementById('genericFields').style.display='block';
+}
+
+function renderList(){
+  const list=document.getElementById('entryList');
+  const s=document.getElementById('searchInput').value.toLowerCase();
+  let f=entries;
+  if(s)f=f.filter(e=>(e.title||'').toLowerCase().includes(s)||(e.login||'').toLowerCase().includes(s)||(e.bankName||'').toLowerCase().includes(s)||(e.concName||'').toLowerCase().includes(s)||(e.concMatricula||'').includes(s));
+  if(catFilter)f=f.filter(e=>getCat(e.type)===catFilter);
+  document.getElementById('entryCount').textContent=`(${f.length})`;
+  if(!f.length){list.innerHTML='<p style="text-align:center;color:#888;padding:30px">📭 Nenhum lançamento salvo</p>';return;}
+  f.sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt)); // Ordena por mais recente
+  list.innerHTML=f.map(e=>{
+    let d='';
+    if(isBank(e.type)){
+      d=`<div class="entry-field"><label>🏦 Banco</label><span>${escHtml(e.bankName||'-')}</span></div>
+         <div class="entry-field"><label>🏢 Ag/Conta</label><span>${escHtml((e.bankAgency||'-')+'/'+(e.bankAccount||'-'))}</span></div>
+         <div class="entry-field"><label>🔑 Senha</label><span>${pwdDisplay(e.pwdAcesso)}</span></div>
+         ${e.pwdTrans?`<div class="entry-field"><label>💳 Trans</label><span>${pwdDisplay(e.pwdTrans)}</span></div>`:''}
+         ${e.pwdAdic?`<div class="entry-field" style="grid-column:1/-1"><label>📝 Adic</label><span>${escHtml(e.pwdAdic)}</span></div>`:''}`;
+    }else if(isConc(e.type)){
+      d=`<div class="entry-field"><label>🏢 Conc</label><span>${escHtml(e.concName||'-')}</span></div>
+         <div class="entry-field"><label>🆔 Matrícula</label><span>${escHtml(e.concMatricula||'-')}</span></div>
+         <div class="entry-field"><label>🔑 Senha</label><span>${pwdDisplay(e.password)}</span></div>`;
+    }else{
+      d=`<div class="entry-field"><label>👤 Login</label><span>${escHtml(e.login||'-')}</span></div>
+         <div class="entry-field"><label>🔑 Senha</label><span>${pwdDisplay(e.password)}</span></div>
+         ${e.notes?`<div class="entry-field" style="grid-column:1/-1"><label>📝 Obs</label><span>${escHtml(e.notes)}</span></div>`:''}`;
+    }
+    return `<div class="entry"><div class="entry-header"><span class="entry-title">${escHtml(e.title||'Sem título')}</span><span class="entry-type">${TYPE_LABELS[e.type]||e.type}</span></div><div class="entry-grid">${d}</div><div class="entry-actions"><button class="btn-sm btn-edit" onclick="editEntry(${e.id})">✏️</button><button class="btn-sm btn-del" onclick="deleteEntry(${e.id})">🗑️</button></div></div>`;
+  }).join('');
+}
+function pwdDisplay(pwd){
+  if(!pwd)return'<em style="color:#888">vazio</em>';
+  const id='pwd_'+Math.random().toString(36).slice(2,9);
+  const enc=btoa(unescape(encodeURIComponent(pwd)));
+  return`<span class="pwd-display"><span id="${id}" onclick="togglePwdView('${id}','${enc}')">••••••••</span><button class="btn-copy" onclick="copyPwd('${enc}')">📋</button></span>`;
+}
+function togglePwdView(id,enc){const e=document.getElementById(id);if(!e)return;if(e.textContent==='••••••••'){e.textContent=decodeURIComponent(escape(atob(enc)));e.style.background='rgba(255,215,0,.3)';}else{e.textContent='••••••••';e.style.background='rgba(255,215,0,.1)';}}
+function copyPwd(enc){const p=decodeURIComponent(escape(atob(enc)));navigator.clipboard.writeText(p).then(()=>showToast('📋 Copiado!')).catch(()=>showToast('❌ Erro'));}
+function deleteEntry(id){if(confirm('Excluir este lançamento?')){entries=entries.filter(e=>e.id!==id);setItem('entries',entries);renderDashboard();renderList();showToast('🗑️ Excluído!');}}
+
+function changeEditType(){
+  const t=document.getElementById('editType').value;
+  document.getElementById('editBankFields').style.display=isBank(t)?'block':'none';
+  document.getElementById('editConcFields').style.display=isConc(t)?'block':'none';
+  document.getElementById('editGenericFields').style.display=(!isBank(t)&&!isConc(t))?'block':'none';
+}
+function editEntry(id){
+  const e=entries.find(e=>e.id===id);if(!e)return;
+  document.getElementById('editId').value=id;document.getElementById('editType').value=e.type;changeEditType();
+  if(isBank(e.type)){document.getElementById('editBankName').value=e.bankName||'';document.getElementById('editBankAgency').value=e.bankAgency||'';document.getElementById('editBankAccount').value=e.bankAccount||'';document.getElementById('editBankPwdAcesso').value=e.pwdAcesso||'';document.getElementById('editBankPwdTrans').value=e.pwdTrans||'';document.getElementById('editBankPwdAdic').value=e.pwdAdic||'';}
+  else if(isConc(e.type)){document.getElementById('editConcName').value=e.concName||'';document.getElementById('editConcMatricula').value=e.concMatricula||'';document.getElementById('editConcPwd').value=e.password||'';}
+  else{document.getElementById('editTitle').value=e.title||'';document.getElementById('editLogin').value=e.login||'';document.getElementById('editPassword').value=e.password||'';document.getElementById('editNotes').value=e.notes||'';}
+  document.getElementById('editModal').classList.add('show');
+}
+function closeEditModal(){document.getElementById('editModal').classList.remove('show');}
+function saveEdit(){
+  const id=parseInt(document.getElementById('editId').value);const i=entries.findIndex(e=>e.id===id);if(i<0)return;
+  const t=document.getElementById('editType').value;entries[i].type=t;
+  entries[i].modifiedAt = new Date().toISOString(); // Atualiza a data de modificação
+  if(isBank(t)){entries[i].bankName=document.getElementById('editBankName').value.trim();entries[i].bankAgency=document.getElementById('editBankAgency').value.trim();entries[i].bankAccount=document.getElementById('editBankAccount').value.trim();entries[i].pwdAcesso=document.getElementById('editBankPwdAcesso').value;entries[i].pwdTrans=document.getElementById('editBankPwdTrans').value;entries[i].pwdAdic=document.getElementById('editBankPwdAdic').value;entries[i].title=entries[i].bankName||'Banco';}
+  else if(isConc(t)){entries[i].concName=document.getElementById('editConcName').value.trim();entries[i].concMatricula=document.getElementById('editConcMatricula').value.trim();entries[i].password=document.getElementById('editConcPwd').value;entries[i].title=entries[i].concName||'Conc';}
+  else{entries[i].title=document.getElementById('editTitle').value.trim();entries[i].login=document.getElementById('editLogin').value.trim();entries[i].password=document.getElementById('editPassword').value;entries[i].notes=document.getElementById('editNotes').value.trim();}
+  setItem('entries',entries);closeEditModal();renderDashboard();renderList();showToast('✏️ Atualizado!');
+}
+
+// ==================== IMPORTAÇÃO E SINCRONIZAÇÃO ====================
+function exportJSON(){
+  if(!entries.length){showToast('⚠️ Sem dados para exportar!');return;}
+  const d={exportedAt:new Date().toISOString(),entries,version:'7.0'};
+  const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='Gerenciador_Senhas_Backup_'+new Date().toISOString().split('T')[0]+'.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1000);showToast('💾 Backup exportado!');
+}
+function handleImport(ev){
+  const f=ev.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=function(e){try{const d=JSON.parse(e.target.result);if(!d.entries)throw new Error('Formato inválido');if(confirm(`Deseja importar e combinar ${d.entries.length} registro(s) do arquivo?`)){importEntries(d.entries);}}catch(err){showToast('❌ Arquivo de backup inválido!');}ev.target.value='';};
+  r.readAsText(f);
+}
+
+// SINCRONIZAÇÃO INTELIGENTE (MERGE)
+function importEntries(importedEntries) {
+    const localEntries = getItem('entries', []);
+    const combined = new Map();
+
+    // Adiciona todas as entradas locais ao mapa
+    localEntries.forEach(entry => combined.set(entry.id, entry));
+
+    let newCount = 0;
+    let updatedCount = 0;
+
+    // Itera sobre as entradas importadas para fazer o merge
+    importedEntries.forEach(imported => {
+        const existing = combined.get(imported.id);
+        if (!existing) {
+            combined.set(imported.id, imported);
+            newCount++;
+        } else {
+            // Se já existe, compara pela data de modificação e mantém a mais recente
+            const existingDate = new Date(existing.modifiedAt || existing.createdAt);
+            const importedDate = new Date(imported.modifiedAt || imported.createdAt);
+            if (importedDate > existingDate) {
+                combined.set(imported.id, imported);
+                updatedCount++;
+            }
+        }
+    });
+
+    entries = Array.from(combined.values());
+    setItem('entries', entries);
+    renderDashboard();
+    renderList();
+    showToast(`✅ Sincronizado! ${newCount} novo(s), ${updatedCount} atualizado(s).`);
+}
+
+function openSyncModal(){ document.getElementById('syncModal').classList.add('show'); }
+function closeSyncModal(){ document.getElementById('syncOutput').style.display='none'; document.getElementById('syncModal').classList.remove('show'); }
+
+function generateShareURL(){
+  if(!entries.length){showToast('⚠️ Sem dados para sincronizar!');return;}
+  const rawData = JSON.stringify({entries, version:'7.0'});
+  const compressedData = LZString.compressToEncodedURIComponent(rawData);
+  const baseUrl = window.location.href.split('?')[0];
+  currentShareURL = `${baseUrl}?data=${encodeURIComponent(compressedData)}`;
+
+  // Exibe o link e o QR Code
+  document.getElementById('urlTextBox').textContent = currentShareURL;
+  const qrOutput = document.getElementById('qrOutput');
+  qrOutput.innerHTML = '';
+  new QRCode(qrOutput, {
+      text: currentShareURL,
+      width: 220,
+      height: 220,
+      colorDark : '#1a1a3e',
+      colorLight : '#ffffff',
+      correctLevel : QRCode.CorrectLevel.H
+  });
+  
+  document.getElementById('syncOutput').style.display = 'block';
+  showToast('🔗 Link e QR Code gerados!');
+}
+
+function copyURL(){
+  if(!currentShareURL){showToast('⚠️ Gere o link primeiro!'); return;}
+  navigator.clipboard.writeText(currentShareURL).then(()=>showToast('📋 Link copiado!')).catch(()=>showToast('❌ Erro ao copiar'));
+}
+
+async function shareURL(){
+  if(!currentShareURL){showToast('⚠️ Gere o link primeiro!'); return;}
+  if(navigator.share){
+    try {
+      await navigator.share({
+          title: 'Gerenciador_Senhas - Link de Sincronização',
+          text: 'Abra este link no navegador do outro dispositivo para importar os dados:',
+          url: currentShareURL
+      });
+      return;
+    } catch(e) { if (e.name !== 'AbortError') showToast('❌ Erro ao compartilhar.'); }
+  } else {
+    copyURL();
+    showToast('📋 Link copiado (navegador não suporta compartilhar).');
+  }
+}
+
+function checkURLForImport(){
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const data = params.get('data');
+    if(data){
+      const rawText = LZString.decompressFromEncodedURIComponent(data);
+      if(rawText){
+        const parsed = JSON.parse(rawText);
+        if(parsed.entries && Array.isArray(parsed.entries)){
+          if (confirm(`Deseja sincronizar ${parsed.entries.length} registro(s) encontrado(s) na URL?`)) {
+            importEntries(parsed.entries);
+            if(window.history && window.history.replaceState){
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          }
+        }
+      }
+    }
+  } catch(e) { console.error('Erro ao processar dados da URL:', e); }
+}
+
+async function shareData(){
+  if(!entries.length){showToast('⚠️ Sem dados!');return;}
+  const js=JSON.stringify({entries,version:'7.0'},null,2);
+  const b=new Blob([js],{type:'application/json'});
+  const f=new File([b],'backup.json',{type:'application/json'});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})){
+    try{await navigator.share({title:'Gerenciador_Senhas',text:`${entries.length} lançamentos`,files:[f]});showToast('📤 Compartilhado!');return;}catch(e){if(e.name==='AbortError')return;}
+  }
+  const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='backup.json';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(u),1000);showToast('📥 Download!');
+}
+
+
+// ==================== INIT ====================
+console.log('✅ Gerenciador_Senhas v7.0 (Definitiva) - Armazenamento Permanente, Sincronização Inteligente e QR Code');
+setupLoginScreen();
+// Não carrega os dados aqui, pois o login é necessário primeiro.
+// A função loadApp() é chamada após o login bem-sucedido.
+</script>
+</body>
+</html>
