@@ -131,6 +131,9 @@ button:hover{transform:translateY(-1px)}
             <option value="aguas">💧 Águas de Manaus</option><option value="energia">⚡ Amazonas Energia</option>
             <option value="vivo">📱 Vivo</option><option value="concoutros">💧 Outras Concessionárias</option>
           </optgroup>
+          <optgroup label="🏥 SAÚDE">
+            <option value="planodesaude">🏥 Plano de Saúde</option>
+          </optgroup>
           <optgroup label="📧 E-MAILS"><option value="email">📧 E-mail</option></optgroup>
           <optgroup label="📱 REDES / STREAMING">
             <option value="social">📱 Rede Social</option><option value="streaming">🎬 Streaming</option>
@@ -228,6 +231,9 @@ button:hover{transform:translateY(-1px)}
         <option value="aguas">Águas de Manaus</option><option value="energia">Amazonas Energia</option>
         <option value="vivo">Vivo</option><option value="concoutros">Outras</option>
       </optgroup>
+      <optgroup label="🏥 SAÚDE">
+        <option value="planodesaude">Plano de Saúde</option>
+      </optgroup>
       <optgroup label="OUTROS">
         <option value="email">E-mail</option><option value="social">Rede Social</option>
         <option value="streaming">Streaming</option><option value="govbr">Gov.br</option>
@@ -279,12 +285,14 @@ const TYPE_CATEGORIES = {
   bradesco:'banco',bb:'banco',itau:'banco',caixa:'banco',nubank:'banco',santander:'banco',
   c6:'banco',picpay:'banco',mercadopago:'banco',bancooutros:'banco',
   aguas:'concessionaria',energia:'concessionaria',vivo:'concessionaria',concoutros:'concessionaria',
+  planodesaude:'outros',
   email:'email',social:'social',streaming:'streaming',govbr:'gov',outros:'outros'
 };
 const TYPE_LABELS = {
   bradesco:'Bradesco',bb:'Banco do Brasil',itau:'Itaú',caixa:'Caixa',nubank:'Nubank',
   santander:'Santander',c6:'C6',picpay:'PicPay',mercadopago:'Mercado Pago',bancooutros:'Outros Bancos',
   aguas:'Águas de Manaus',energia:'Amazonas Energia',vivo:'Vivo',concoutros:'Outras Concessionárias',
+  planodesaude:'Plano de Saúde',
   email:'E-mail',social:'Rede Social',streaming:'Streaming',govbr:'Gov.br',outros:'Outros'
 };
 const BANK_TYPES = ['bradesco','bb','itau','caixa','nubank','santander','c6','picpay','mercadopago','bancooutros'];
